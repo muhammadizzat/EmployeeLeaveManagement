@@ -25,12 +25,26 @@ SECRET_KEY = '=d#mg89$cte(7^^0w2n4$m3m!weo-4$8jo7b%(x(oznmr4&c*('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost',
+                 '127.0.0.1']
 
+DEBUG = False
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'elm',
+        'USER': 'root',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'PORT': '3306'
+    },
+}
 
 # Application definition
 
 INSTALLED_APPS = [
+    'elm',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -117,4 +131,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+FIXTURE_DIRS = (os.path.join(BASE_DIR, "fixtures"),)
 STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+MEDIA_URL = '/media/'
+
+LOGIN_REDIRECT_URL = r'^home'
+LOGIN_URL = '/login/'
+LOGIN_EXEMPT_URLS = (r'^admin/', r'^api/*', r'^media/')
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 105,
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}

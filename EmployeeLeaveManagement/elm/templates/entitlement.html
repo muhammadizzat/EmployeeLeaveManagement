@@ -1,0 +1,440 @@
+{% extends "elm/templates//base.html" %}
+
+{% load lemoncore_tags %}
+{% block content %}
+    <!-- JQUERY UI -->
+    <link rel="stylesheet" href="/static/third_party/select2/select2.min.css">
+	<link rel="stylesheet" href="/static/third_party/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="/static/third_party/jquery-contextMenu-2.4.5/jquery.contextMenu.css">
+
+  	<script src="/static/third_party/jquery/jquery-3.2.1.min.js"></script>
+
+    <script src="/static/third_party/daterangepicker/moment.js"></script>
+    <script type="text/javascript" src="/static/third_party/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/select2/select2.min.js"></script>
+	<script src="/static/third_party/daterangepicker/daterangepicker.js"></script>
+
+    <style>
+		.text-color{
+			color: #fff;
+		}
+
+        table.dataTable tbody td {
+            padding: 0px 10px !important;
+        }
+
+        table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
+            background-color: #aab7d1 !important;
+        }
+        table.dataTable tbody tr.selected {
+            background-color: #B0BED9 !important;
+        }
+        .profile_name_text_color{
+
+        }
+        .designation{
+            font-size: 100%;
+            text-transform: capitalize;
+            color: #1b1b1b;
+        }
+        .cancelBtn{
+            color: #fff !important;
+            background-color: #d9534f !important;
+            border-color: #d43f3a !important;
+        }
+
+		.label-styling{
+			width: 85px;
+		}
+
+		.tab-content-styling{
+			background-color: #fafafa;
+			width: 96%;
+			height: 365px;
+			margin-top: 5px;
+			margin-left: 5px;
+			font-family: Segoe UI, Roboto,Arial,Helvetica;
+			padding-left: 10px;
+    	}
+		.text-primary{
+			color: #337ab7;
+			font-family: Roboto,Arial,Helvetica;
+		}
+
+		/* FORM */
+		.working_hour_section{
+			display: none;
+		}
+		#working_hour_list{
+			padding-left: 0px;
+		}
+		#working_hour_list li{
+			display:inline-block;
+			padding-right: 5px;
+		}
+		#apply_leave_comment{
+			resize: none;
+		}
+
+		th, td{
+			text-align: center;
+		}
+        .align-left{
+			text-align: left;
+		}
+		.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+			color: #1b1b1b;
+			cursor: default;
+			background-color: #dddddd;
+			font-weight: 800;
+			border: 1px solid #ddd;
+			border-bottom-color: transparent;
+		}
+
+		.badge {
+			border-radius: 4px;
+		}
+
+        th {
+            border-top: 10px solid #afafaf;
+			border-bottom: 0.5px solid #afafaf;
+			border-right: 0.5px solid #afafaf;
+			}
+
+		th:first-child {
+		border-left: 1px solid #afafaf;
+		}
+		table.dataTable.cell-border tbody td {
+			border-right: 1px solid #afafaf !important;
+		}
+    </style>
+
+    <!-- START ADD ENTITLEMENT MODAL -->
+    <div class="modal fade " id="assign_entitlement_modal" tabindex="-1" role="dialog"aria-labelledby="TitleLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content modal-project">
+                <div class="modal-header modal_styling">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&#xD7;</span></button>
+                    <h4 id="entitlement_modal_title" class="modal-title">Assign Entitlement</h4>
+                </div>
+                    <div class="modal-body modal_styling">
+						<div class="modal-body modal_styling tab-content-styling">
+							<div class="row">
+								<div class="col-md-3">
+									<label id="leave_type_label" class="text-primary label-styling" style="display:inline-block;">Leave Type </label>
+								</div>
+								<div class="col-md-9">
+									<p id="leave_type_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><select class="form-control btn-xs" id="assignLeaveType"></select></p> <br>
+								</div>
+								<div class="col-md-3">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-3">
+									<label id="year_label" class="text-primary label-styling" style="display:inline-block;">Year </label>
+								</div>
+								<div id ="current_year_field"class="col-md-9">
+								</div>
+							</div>
+                            <div class="row">
+								<div class="col-md-3">
+									<label id="day_label" class="text-primary label-styling" style="display:inline-block;">Days </label>
+								</div>
+								<div class="col-md-9">
+									<p id="day_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><input id="assignDay" type="number" min="1"step="0.5"> </p> <br>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-3">
+									<label id="comment_label" class="text-primary label-styling" style="display:inline-block;">Comment </label>
+								</div>
+								<div class="col-md-9">
+									<p id="comment_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><textarea id="assignComment" rows="3"></textarea> </p> <br>
+								</div>
+							</div>
+						</div>
+                    </div>
+                    <div id="entitlement_modal_footer" class="modal-footer modal_styling">
+						<button id="applyEntitlement_Button" type="button" class="btn btn-primary" onclick="updateEntitlementData()">Assign</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+	<div class="content" style="height: 800px;">
+		<div class="row " style="padding-left: 0px; padding-right: 0px; height: 800px;">
+            <div class="col-lg-12" style="padding: 0px; margin: 0px; height: 800px;">
+                <div class="panel panel-success b-primary">
+                    <div class="panel-heading bg-primary-i">
+                        <h3 class="panel-title text-color">Entitlement Management</h3>
+                    </div>
+                    <div class="panel-body project_table_styling" style="">
+                        <div class="pull-right"style="margin-right: 20px; margin-bottom:10px;">
+                            <span style="color: #2c97de;">Year Filter : </span>
+                            <select id="yearSelect" class="form-control btn-xs">
+                                <option id="2021" value="2021">2021</option>
+                                <option id="2020" value="2020">2020</option>
+                                <option id="2019" value="2019">2019</option>
+                                <option id="2018" value="2018">2018</option>
+                                <option id="2017" value="2017">2017</option>
+                            </select>
+                        </div>
+                        <div id="entitlement_section" class="panel-body" style="padding-left: 0px; height:1000px;">
+                            <table id="employee_entitlement_datatable" style="border-top: 1px solid #afafaf; overflow-x: scroll"class="display table table-hover table-responsive cell-border" width="100%">
+                                <thead id="leaves_header">
+                                    <tr id="entitlement_header">
+                                    </tr>
+                                    <tr id="entitlement_sub_header">
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="/static/third_party/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/third_party/jquery-contextMenu-2.4.5/jquery.contextMenu.js"></script>
+	<script type="text/javascript" src="/static/third_party/jquery-contextMenu-2.4.5/jquery.ui.position.min.js"></script>
+	<script type="text/javascript" src="/static/third_party/jquery-contextMenu-2.4.5/main.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/media/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/media/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Buttons/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Buttons/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Buttons/js/buttons.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Buttons/js/buttons.colVis.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Responsive/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Responsive/js/responsive.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/DataTables-1.10.15/extensions/Select/js/dataTables.select.min.js"></script>
+    <script>
+
+	// QUERY REQUIRE DATA SECTION
+		// DEFAULT SELECTED YEAR (CURRENT YEAR)
+        var selected_year = new Date().getFullYear();
+
+		// CURRENT VIEW
+		var current_view = '{{ selected_view }}';
+
+		// DEFAULT URL
+		var urls = []
+
+        //FORM
+        var selected_user_list = []
+	// RELOAD DATATABLE
+		function reloadDatatable(){
+			employee_entitlement_datatable.ajax.url("/api/hrm/entitlement/{{ selected_view }}/{{ selected_user.id }}/" + selected_year + "/?format=json").load();
+		}
+		// YEAR FILTER
+        $('#yearSelect').select2({
+            placeholder: "Select a year",
+            multiple: false,
+            width: '80px',
+            height:'190px'
+        });
+
+        $('#yearSelect').val(selected_year).trigger('change');
+
+		//ON YEAR SELECT
+        $('#yearSelect').on('select2:select', function (e) {
+            selected_year =  parseInt($("#yearSelect").val());
+			reloadDatatable();
+        });
+
+        //MOVE FILTER TO RIGHT
+        $('.dataTables_length').addClass('pull-right');
+
+    // FORM FIELDS
+        //ASSIGN LEAVE
+        var leave_list = [];
+
+        //SET INITIAL COLUMN FOR DYNAMIC ENTITLEMENT COLUMN
+        var entitlement_column_list = [{"data" : "id", "width": "auto", "visible": false,},
+                                        {"data" : "employee_id", "width": "50", "visible": true,},
+                                        {"data" : "official_name", className: "align-left", "width": "200", "visible": true,},
+                                        {"data" : "department", className: "align-left", "width": "100", "visible": true,},];
+
+        $('#entitlement_header').append(`<th rowspan="2">ID</th>
+                                            <th rowspan="2">LS ID</th>
+                                            <th rowspan="2">Name</th>
+                                            <th rowspan="2">Department</th>`)
+
+
+        {% for data in all_leave_type %}
+
+            leave_type_column = '{{data.leave_type}}';
+            leave_type_column = leave_type_column.toLowerCase().replace(/ /g,"_");
+
+
+            if('{{data.leave_type}}' == 'Absent'){
+
+                //DYNAMIC ENTITLEMENT ABSENT COLUMN
+                entitlement_column_list.push({"data" : "entitlement.absent.total_leave_applied", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th class="entitlement-column">Absent</th>`)
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">#</th>`)
+            }
+            // GET UNPAID LEAVE
+            else if('{{data.leave_type}}' == 'Unpaid'){
+                //DYNAMIC ENTITLEMENT UNPAID COLUMN
+                entitlement_column_list.push({"data" : "entitlement.unpaid.total_leave_applied", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th class="entitlement-column">Unpaid</th>`)
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">Taken</th>`)
+            }
+
+            else if('{{data.leave_type}}' == 'Parental'){
+                leave_list.push({id: {{data.id}}, text: '{{data.leave_type}}', checked: false});
+                //DYNAMIC ENTITLEMENT COLUMN
+                entitlement_column_list.push({"data" : "entitlement."+ leave_type_column +".total_entitled_day", "width": "auto", "visible": true,},
+                                             {"data" : "entitlement."+ leave_type_column +".total_available_leave", "width": "auto", "visible": true,},
+                                             {"data": "gender", "width": "auto", "render": function (data, type, row) {
+                                                 return `<p style="cursor: pointer; text-transform: capitalize;">${data}</p>`;
+                                             }}),
+                $('#entitlement_header').append(`<th colspan="3" class="entitlement-column">${'{{data.leave_type}}'}</th>`)
+
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">Ent</th>
+                                                     <th class="entitlement-column">Bal</th>
+                                                     <th class="entitlement-column">Gender</th>`)
+
+            }
+            //GET LEAVE TYPE EXCEPT ABSENT & UNPAID
+            if(leave_type_column !== 'unpaid' && leave_type_column !== 'absent' && '{{data.leave_type}}' !== 'Parental'){
+                leave_list.push({id: {{data.id}}, text: '{{data.leave_type}}', checked: false});
+
+                //DYNAMIC ENTITLEMENT COLUMN
+                entitlement_column_list.push({"data" : "entitlement."+ leave_type_column +".total_entitled_day", "width": "auto", "visible": true,},
+                                             {"data" : "entitlement."+ leave_type_column +".total_available_leave", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th colspan="2" class="entitlement-column">${'{{data.leave_type}}'}</th>`)
+
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">Ent</th>
+                                                     <th class="entitlement-column">Bal</th>`)
+            }
+        {% endfor %}
+        $('#assignLeaveType').select2({
+            placeholder: "Select Leave",
+			data: leave_list,
+            multiple: false,
+			dropdownParent: $('#assign_entitlement_modal'),
+            width: '160px',
+            height:'190px'
+        });
+		$('#assignLeaveType').val(null).trigger('change');
+
+
+    // ADD OR EDIT ENTITLEMENT
+    function updateEntitlementData(){
+        selected_type = $('#assignLeaveType').select2('data');
+        update_type = selected_type[0].id
+        update_year = selected_year
+        update_day = document.getElementById("assignDay").value;
+        update_comment = document.getElementById("assignComment").value;
+        selected_row_data = employee_entitlement_datatable.rows('.selected').data();
+        entitlement_validation_object = {
+            'leave_type_id': update_type,
+            'year': update_year,
+            'days': update_day,
+            'comment': update_comment
+        };
+
+        var selected_rows_index = employee_entitlement_datatable.rows('.selected');
+        $(selected_row_data).each(function(index, data) {
+            var entitlement_validation_data = []
+            var update_entitlement_id = []
+            var employee_id = data.id
+            // PREVENT LOGIN USER TO EDIT THEIR OWN ENTITLEMENT
+            if({{ selected_user.id }} !== employee_id){
+                validateEntitlement = $.ajax({
+                    type: 'POST',
+                    url: "/api/hrm/validate_entitlement/"+employee_id+"/?format=json",
+                    data: JSON.stringify(entitlement_validation_object),
+                    contentType: 'application/json',
+                    success:function(){
+                        leave_type_name = selected_type[0].text
+                        leave_type_name = leave_type_name.toLowerCase()
+                        leave_type_name = leave_type_name.replace(/ /g,"_");
+
+                        // IN PROGRESS
+                        current_entitled = selected_row_data[index]['entitlement'][leave_type_name]['total_entitled_day'];
+                        current_available = selected_row_data[index]['entitlement'][leave_type_name]['total_available_leave']
+                        differences = update_day - current_entitled;
+
+                        updated_available = current_available + differences
+                        selected_row_data[index]['entitlement'][leave_type_name]['total_entitled_day'] = update_day;
+                        selected_row_data[index]['entitlement'][leave_type_name]['total_available_leave'] = updated_available;
+
+                        //UPDATE/REDRAW ROW WITH NEW DATA
+                        employee_entitlement_datatable.row('.row-'+employee_id).data(data).invalidate();
+
+                    },
+                    error: function(err){
+                        alert("Failed");
+                        console.log(err);
+                    }
+                })
+            }
+            else{
+                alert("You're not allowed to edit your own entitlement, other user(s) entitlement will be edit accordingly")
+            }
+        });
+        //RESET FORM
+        $('#assignLeaveType').val(null).trigger('change');
+        document.getElementById('assignDay').value = "";
+        document.getElementById("assignComment").value = null;
+        $('#assign_entitlement_modal').modal('hide');
+    }
+
+	// ENTITLEMENT DATATABLE
+        var employee_entitlement_datatable = $('#employee_entitlement_datatable').DataTable({
+            dom: 'Blfrtip',
+            JQueryUI: true,
+            bPaginate: false,
+            destroy: true,
+            pageResize: true,
+            "sScrollX": "100%",
+            scrollY: '760px',
+            responsive: false,
+            select: true,
+            ajax: {
+                url: "/api/hrm/entitlement/{{ selected_view }}/{{ selected_user.id }}/" + selected_year + "/?format=json",
+                dataSrc: '',
+            },
+            columns : entitlement_column_list,
+            //CREATE NEW CLASS FOR EACH ROW BASED ON USER ID
+            createdRow: function( row, data, dataIndex ) {
+                // Set the data-status attribute, and add a class
+                $(row).addClass("row-" + data.id);
+            },
+            buttons: []
+        });
+
+        // ENTITLEMENT TABLE CONTEXT MENU
+        $(document).contextMenu({
+			selector: '#employee_entitlement_datatable td',
+			callback: function (menu_item_name, options) {
+				if (menu_item_name == "assign_entitlement") {
+                    $("#current_year_field").html('');
+                    $("#current_year_field").html(`<p>${selected_year}</p>`);
+                    $('#assign_entitlement_modal').modal('show');
+				}
+			},
+			items: {
+				"assign_entitlement": { name: "Assign Entitlement",
+                                        icon: "fa-edit",
+                                        visible: function(key, opt){
+                                            if( current_view == 'lead' ){
+                                                return false;
+                                            }
+                                            else if(current_view == 'hrm'){
+                                                return true;
+                                            }
+
+                                        }
+                                    },
+			},
+		})
+    </script>
+{% endblock content %}

@@ -1,0 +1,206 @@
+{% extends "elm/templates//base.html" %}
+
+{% load lemoncore_tags %}
+{% block content %}
+    <!-- JQUERY UI -->
+    <link rel="stylesheet" href="/static/third_party/select2/select2.min.css">
+	<link rel="stylesheet" href="/static/third_party/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="/static/third_party/jquery-contextMenu-2.4.5/jquery.contextMenu.css">
+
+  	<script src="/static/third_party/jquery/jquery-3.2.1.min.js"></script>
+
+    <script src="/static/third_party/daterangepicker/moment.js"></script>
+    <script type="text/javascript" src="/static/third_party/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/third_party/select2/select2.min.js"></script>
+	<script src="/static/third_party/daterangepicker/daterangepicker.js"></script>
+    <style>
+    .center-content{
+        border: 0.5px solid grey;
+        border-radius: 5px;
+        width: 600px;
+        position: relative;
+        background: #fff;
+        margin: 15% auto auto auto;
+        padding: 2em;
+    }
+    textarea {
+        resize: none;
+    }
+    body{
+        background-color: #f4f4f4;
+    }
+    </style>
+    <!-- START APPLY LEAVE MODAL -->
+    <div class="" id="update_leave_content" role="dialog" aria-labelledby="TitleLabel">
+        <div class="dialog" role="document">
+            <div class="content" style="min-height: 0px;">
+                <div class="center-content">
+                <div class="header">
+                    <h4 class="modal-title" style="padding-left: 15px; padding-right: 15px; margin-bottom: 10px;">Update Leave</h4>
+                </div>
+                <div class="body">
+                    <div class="modal-body modal_styling tab-content-styling" >
+                        <div id="employee_field_section" class="row">
+                            <div class="col-md-4">
+                                <label id="employee_label" class="text-primary label-styling" >Employee </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="employee_field" style="margin: 0;"></p><br> 
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="leave_type_label" class="text-primary label-styling" >Leave Type </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="leave_type_field" style="margin: 0;"></p> <br> 
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="date_label" class="text-primary label-styling" >Date </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="date_field" ></p> <br>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="duration_label" class="text-primary label-styling" >Duration </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="duration_field" style="
+                                margin: 0;
+                                "></p> <br>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="status_label" class="text-primary label-styling" style="width: 100%;">Status </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="status_field" style="
+                                margin: 0;
+                                "><span style="text-transform: capitalize;"></span></p> <br>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="comment_label" class="text-primary label-styling" >Reason </label>
+                            </div>
+                            <div class="col-md-8">
+                                <p id="comment_field" ></p><br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label id="lead_comment_label" class="text-primary label-styling">Reason for Approval/Reject </label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="comment_field" ><textarea id="lead_leave_text" maxlength="254" style="
+                                border: 0.5px solid grey;
+                                width: 100%;
+                                "></textarea> </p> <br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="update_section" class=""><p class="text-center text-danger"><b>You dont have permission to update this leave.</b></p></div>
+            </div>
+        </div>
+    </div>
+    <!-- END APPLY LEAVE MODAL -->
+
+    <script>
+        var is_lead = '{{is_lead}}';
+        var is_hr = '{{is_hr}}';
+
+        {% for data in leave_data %}
+            leave_id = {{data.0}};
+            leave_employee_id = {{data.1}};
+            leave_employee_name = '{{data.2}}';
+            leave_type_id = {{data.3}};
+            leave_type_name = '{{data.4}}';
+            leave_status = '{{data.5}}';
+            leave_start_date = '{{data.6}}';
+            leave_end_date = '{{data.7}}';
+            leave_duration = {{data.8}};
+            leave_working_hour = '{{data.9}}';
+            leave_comment = `{{data.10|safe}}`;
+        {% endfor%}
+        leave_start_date = moment(leave_start_date).format('YYYY-MM-DD')
+        leave_end_date = moment(leave_end_date).format('YYYY-MM-DD')
+        display_status = leave_status.replace(/_/g, ' ')
+        display_working_hour = leave_working_hour.replace(/_/g, ' ')
+        $('#employee_field').html(`${leave_employee_name}`)
+        $('#leave_type_field').html(`${leave_type_name}`)
+        $('#date_field').html(`${leave_start_date} - ${leave_end_date} (${display_working_hour})`)
+        $('#duration_field').html(`${leave_duration}`)
+        $('#status_field').html(`<span style="text-transform: capitalize;">${display_status}</span>`)
+        $('#comment_field').html(`${leave_comment}`)
+
+        // ALLOWED LEAVE UPDATE IF ITS LEAD
+        if(is_lead == 'true' || is_hr == 'true'){
+            $('#update_section').html(`<div style="display:inline-block;width: 100%;">
+                                            <div class="pull-right" style="">
+                                                <button id="verifyLeaves_Button" type="button" class="btn btn-danger" onclick="updateLeave('rejected')">Reject</button>
+                                                <button id="verifyLeaves_Button" type="button" class="btn btn-primary" onclick="updateLeave('approved')">Approve</button>
+                                            </div>
+                                        </div`)
+        }
+        else{
+            // ONLY ALLOW PERSON WHO APPLY LEAVE TO SEE THE STATUS
+            if(leave_employee_id == {{ selected_user.id }}){
+                $('#update_section').html(`<p class="text-center text-danger"> You dont have permission to update this leave</p>`)
+            }
+            else{
+                // REMOVE HTML IF OTHER USER TRY TO OPEN PAGE
+                $('#update_leave_content').html(``)
+            }
+        }
+        // REMOVE HTML IF LEAVE ALREADY APPROVED / REJECTED
+        if(leave_status !== 'pending_approval' && is_hr == 'false'){
+            $('#update_leave_content').html(``)
+        }
+        function updateLeave(approval_satus){
+            lead_leave_reason = document.getElementById("lead_leave_text").value;
+            leave_updateData = {
+								"employee": leave_employee_id,
+								"status": approval_satus,
+								"start_date": leave_start_date,
+								"end_date": leave_end_date,
+								"modified_date": moment(),
+								"working_hour_duration": leave_working_hour,
+								"duration": leave_duration,
+								"leave_type": leave_type_id,
+								"leave_type_name": leave_type_name,
+                                "approved_by": {{ selected_user.id }},
+								"comment": leave_comment,
+                                "lead_comment": lead_leave_reason,
+							};
+            if(lead_leave_reason == ''){
+                alert('Please provide a reason for approving or rejecting this leave')
+            }
+            else{
+            $.ajax({
+					type: 'PUT',
+					url: "/api/hrm/leave_detail/" + leave_id + "/?format=json",
+					data: JSON.stringify(leave_updateData),
+					contentType: 'application/json',
+					success:function(){
+                        alert('Leave successfully updated, this page is no longer valid');
+                        window.close();
+					},
+					error: function(err){
+						alert("Failed");
+						console.log(err);
+					}
+				})
+            }
+        }
+
+    </script>
+{% endblock content %}

@@ -1,0 +1,1487 @@
+{% extends 'elm/templates/base.html' %}
+
+{% load lemoncore_tags %}
+{% block content %}
+
+<style>
+    .text-color{
+        color: #fff;
+    }
+
+    .title-styling{
+        margin-bottom: 15px;
+    }
+    table.dataTable tbody td {
+        padding: 0px 10px !important;
+    }
+    table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
+        background-color: #aab7d1 !important;
+    }
+    table.dataTable tbody tr.selected {
+        background-color: #B0BED9 !important;
+    }
+    .profile_name_text_color{
+
+    }
+    .designation{
+        font-size: 100%;
+        text-transform: capitalize;
+        color: #1b1b1b;
+    }
+    .cancelBtn{
+        color: #fff !important;
+        background-color: #d9534f !important;
+        border-color: #d43f3a !important;
+    }
+    .label-styling{
+        width: 85px;
+    }
+    .tab-content-styling{
+        background-color: #fafafa;
+        width: 96%;
+        height: 365px;
+        margin-top: 5px;
+        margin-left: 5px;
+        font-family: Segoe UI, Roboto,Arial,Helvetica;
+        padding-left: 10px;
+    }
+    .text-primary{
+        color: #337ab7;
+        font-family: Roboto,Arial,Helvetica;
+    }
+    /* FORM */
+    .working_hour_section{
+        display: none;
+    }
+    #working_hour_list{
+        padding-left: 0px;
+    }
+    #working_hour_list li{
+        display:inline-block;
+        padding-right: 5px;
+    }
+    #apply_leave_comment{
+        resize: none;
+    }
+
+    #leave_type_field, #employee_field, #start_date_field, #comment_field{
+        width: 100% !important;
+    }
+    textarea{
+        width:100%;
+    }
+    th, td{
+        text-align: center;
+    }
+    .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+        color: #1b1b1b;
+        cursor: default;
+        background-color: #dddddd;
+        font-weight: 800;
+        border: 1px solid #ddd;
+        border-bottom-color: transparent;
+    }
+    .badge {
+        border-radius: 4px;
+    }
+    /* DATATABLE ROWS */
+
+    #employee_entitlement_datatable tbody > tr > td {
+        height: 33px;
+        box-shadow: 0 1px #b7b7b7ab;
+    }
+    .align-left{
+        text-align: left;
+    }
+    #employee_entitlement_datatable th {
+        border-bottom: 0.5px solid #afafaf;
+        border-right: 0.5px solid #afafaf;
+    }
+    #employee_entitlement_datatable th:first-child {
+        border-left: 1px solid #afafaf;
+    }
+    table.dataTable.cell-border tbody td {
+        border-right: 1px solid #afafaf !important;
+    }
+
+    table.dataTable thead>tr>td.sorting, table.dataTable thead>tr>td.sorting_asc, table.dataTable thead>tr>td.sorting_desc, table.dataTable thead>tr>th.sorting, table.dataTable thead>tr>th.sorting_asc, table.dataTable thead>tr>th.sorting_desc {
+        padding-right: 20px !important;
+    }
+
+    .title-white{
+        color: #f7f7f7 !important;
+    }
+
+    .entitlement-header{
+        background: #5C5C5C;
+        border-top: 1px solid #111;
+        color: #FFF;
+    }
+    .entitlement-column{
+        border-right: 1px solid #111;
+    }
+    .entitlement-first-column{
+        border-left: 1px solid #111;
+    }
+    /*BUTTON*/
+    .btn-success-2 {
+        color: #fff !important;
+        background-color: #5cb85c !important;
+        border-color: #4cae4c !important;
+    }
+    .btn-default{
+        color: #fff !important;
+        background-color: #5cb85c !important;
+        border-color: #4cae4c !important;
+    }
+
+    .btn-default.btn-view-entitlement{
+        color: #fff !important;
+        background-color: #337ab7 !important;
+        border-color: #337ab7 !important;
+    }
+
+</style>
+
+<!-- START APPLY LEAVE MODAL -->
+<div class="modal fade " id="apply_leaves_modal" tabindex="-1" role="dialog"aria-labelledby="TitleLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-project">
+            <div class="modal-header modal_styling">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&#xD7;</span></button>
+                    <h4 id="leave_modal_title"class="modal-title">Apply Leave</h4>
+                </div>
+                <div class="modal-body modal_styling">
+                    <div class="modal-body modal_styling tab-content-styling">
+                        <div id="employee_field_section" class="row">
+                            <div class="col-md-3">
+                                <label id="employee_label" class="text-primary label-styling" style="display:inline-block;">Employee </label>
+                            </div>
+                            <div class="col-md-9">
+                                <p id="employee_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><select class="form-control btn-xs" id="userSelect"></select></p> <br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label id="leave_type_label" class="text-primary label-styling" style="display:inline-block;">Leave Type </label>
+                            </div>
+                            <div class="col-md-9">
+                                <p id="leave_type_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><select class="form-control btn-xs" id="leaveTypeSelect"></select></p>
+                                <span id="lead_edit_leave_type"></span>
+                                <br>
+                            </div>
+                            <div class="col-md-3">
+                            </div>
+                            <div class="col-md-9">
+                                <p id="leave_available_field" style="display:inline-block; margin: 0; padding-bottom: 10px;">--</p> <br>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label id="start_date_label" class="text-primary label-styling" style="display:inline-block;">Select Date </label>
+                            </div>
+                            <div class="col-md-9">
+                                <p id="start_date_field" style="display:inline-block; margin: 0; padding-bottom: 10px;">   <input class="" id="apply_leave_date" type="text" name="apply_leave_date" placeholder="Select Leave Date"/></p> <br>
+                                <p id="" style="display:inline-block; margin: 0; padding-bottom: 10px;"> Date : <span id="total_date_display"></span></p> <br>
+                                <p id="" style="display:inline-block; margin: 0; padding-bottom: 10px;"> Duration : <span id="total_duration_display"></span></p> <br>
+                            </div>
+
+                        </div>
+                        <div class="row working_hour_section">
+                            <div class="col-md-3">
+                                <label id="start_date_label" class="text-primary label-styling" style="display:inline-block;">Select Work Duration </label>
+                            </div>
+                            <div id="working_hour_field" class="col-md-9">
+                                <ul id="working_hour_list" style="display:inline-block; margin: 0; padding-bottom: 10px;">
+                                    <li><input type="radio" name="working_hour_duration"  id="first_half" value="first_half"> 1st half of the Day </li>
+                                    <li><input type="radio" name="working_hour_duration" id="second_half" value="second_half"> 2nd half of the Day </li>
+                                    <li><input type="radio" name="working_hour_duration" id="full_day" value="full_day" checked> Full Day </li>
+                                </ul> <br>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label id="comment_label" class="text-primary label-styling" style="display:inline-block;">Reason </label>
+                            </div>
+                            <div class="col-md-9">
+                                <p id="comment_field" style="display:inline-block; margin: 0; padding-bottom: 10px;"><textarea id="apply_leave_comment" rows="3" cols="20" maxlength="254"></textarea> </p> <br>
+                            </div>
+                        </div>
+                        {% comment %} HR LEAD VERIFY {% endcomment %}
+                        <div id="verifyFormSection">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label id="verify_status_label" class="text-primary label-styling" style="width: 100%;">Status </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <p id="verify_status_field" style="display:inline-block; margin: 0; padding-bottom: 10px;">
+                                        <select class="form-control btn-xs" id="verifyStatusSelect">
+                                            <option id="pending_approval" value="pending_approval">Pending Approval</option>
+                                            <option id="approved" value="approved">Approved</option>
+                                            <option id="rejected" value="rejected">Rejected</option>
+                                            <option id="cancelled" value="cancelled" >Cancelled</option>
+                                        </select>
+                                    </p><br>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label id="verify_lead_comment_label" class="text-primary label-styling">Reason for Approval/Reject </label>
+                                </div>
+                                <div class="col-sm-8">
+                                    <p id="verify_lead_comment_field" ><textarea id="verify_lead_reason" maxlength="254" style="border: 0.5px solid grey; width: 100%;"></textarea> </p> <br>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="leave_modal_footer" class="modal-footer modal_styling">
+                    <button id="applyLeaves_Button" type="button" class="btn btn-primary" onclick="applyLeave()">Apply</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- END APPLY LEAVE MODAL -->
+    <div class="content">
+        <a id="link"></a>
+        <div class="container-fluid">
+            <div class="row " style="">
+                <div class="col-lg-12" style="margin-top: 10px;">
+                    <h3 class="f-w-300 m-t-1 title-styling">Leaves Portal</h3>
+                    <!-- Tabs Buttons -->
+                    <ul class="nav nav-tabs">
+                        <li id="lead_tab" role="presentation" class="active">
+                            <a aria-expanded="true" data-toggle="tab" href="#tab-lead" role="tab" onclick="switchView('lead')">Lead</a>
+                        </li>
+                        <li id="leave_tab" role="presentation">
+                            <a aria-expanded="true" data-toggle="tab" href="#tab-leave" role="tab" onclick="switchView('leave')">Leave</a>
+                        </li>
+                        {% if request.user|has_group:"Leaves Manager" %}
+                        <li role="presentation">
+                            <a aria-expanded="true" data-toggle="tab" href="#tab-hrm" role="tab" onclick="switchView('hrm')">HRM</a>
+                        </li>
+                        {% else %}
+
+                        {% endif %}
+                        <div class="pull-right"style="margin-right: 20px;">
+                            <span style="color: #2c97de;">Year Filter : </span>
+                            <select id="yearSelect" class="form-control btn-xs">
+                                <option id="2021" value="2021">2021</option>
+                                <option id="2020" value="2020">2020</option>
+                                <option id="2019" value="2019" selected>2019</option>
+                                <option id="2018" value="2018" >2018</option>
+                                <option id="2017" value="2017">2017</option>
+                            </select>
+                        </div>
+                    </ul>
+                    <div class="col-lg-12" style="padding-right: 0px; padding-left: 0px; padding-top:10px;">
+                        <div id="entitlement_section" class="panel panel-primary b-primary" style="margin-top: 10px; margin-bottom: 10px; background-color: #f4f4f4;">
+                            <div class="panel-heading bg-primary-i">
+                                <h3 class="panel-title title-white">My Entitlements</h3>
+                            </div>
+                            <div  class="panel-body" style="">
+                                <table id="employee_entitlement_datatable" style="overflow-x: scroll; border-top: 1px solid #afafaf; border-color: #afafaf !important;"class="display table table-hover table-responsive cell-border" width="100%">
+                                    <thead id="leaves_header">
+
+                                        <tr id="entitlement_header" class="entitlement-header">
+
+                                        </tr>
+                                        <tr id="entitlement_sub_header">
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel-body" style="padding-left: 0px; padding-top: 0px;">
+                            <table id="employee_leaves_datatable" style="overflow-x: scroll"class="display table table-hover table-responsive" width="100%">
+                                <thead id="leaves_header">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>EMPLOYEE ID</th>
+                                        <th>NAME</th>
+                                        <th>TYPE</th>
+                                        <th>REASON</th>
+                                        <th>START DATE</th>
+                                        <th>END DATE</th>
+                                        <th>DAYS</th>
+                                        <th>WORKING HOUR</th>
+                                        <th>STATUS</th>
+                                        <th>VERIFIED BY</th>
+                                        <th>VERIFIED REASON</th>
+                                        <th>MODIFIED DATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // QUERY REQUIRE DATA SECTION
+        // DEFAULT SELECTED YEAR (CURRENT YEAR)
+        var selected_year = new Date().getFullYear();
+
+        // DEFAULT VIEW
+        var current_view = 'lead';
+
+        // DEFAULT URL
+        var urls = [];
+
+        // GLOBAL VARIABLE
+
+        var apply_status = '';
+        var leave_type = '';
+
+        // CHECK LEAD ASSIGNED
+        var lead_assigned = '{{lead_assigned}}';
+
+        // APPLY LEAVE FORM
+        var leave_selected = 'no';
+        var startDate = [];
+        var endDate = [];
+        var duration = 0;
+        var get_user_leaves = [];
+        var all_userleaves = [];
+
+        var half_day = false;
+        var half_day_working_hour = '';
+        // UPDATE APPROVED USER NAME
+
+        // EDIT LEAVES
+        var edit_leave_id = [];
+        var edit_leave_type = [];
+        var edit_startDate = [];
+        var edit_endDate = [];
+        var edit_duration = 0;
+        var edit_status = '';
+        var edit_comment = '';
+        // VERIFY LEAVE
+        var verify_leave_id = [];
+        var verify_employee_id = [];
+        var verify_employee_name = [];
+        var verify_status = [];
+        var verify_leave_type_id = [];
+        var verify_leave_type = [];
+        var verify_startDate = [];
+        var verify_endDate = [];
+        var verify_duration = [];
+        var verify_working_hour = [];
+        var verify_comment = [];
+
+        getEmployeeSelectedYearData(selected_year);
+
+        // GET ALL LEAVES DATA
+        function getEmployeeSelectedYearData(selected_year){
+            urls = "/api/hrm/employee/leave/{{ selected_user.id }}/" + selected_year + "/?format=json";
+
+            if(current_view === 'hrm'){
+                selected_employee = $('#userSelect').select2('data');
+                urls = "/api/hrm/employee/leave/"+ selected_employee[0].id+"/" + selected_year + "/?format=json"
+            }
+            get_user_leaves = $.ajax({
+                type: "GET",
+                url: urls,
+                dataType: "application/json",
+                async: false
+            }).responseText;
+            all_userleaves = JSON.parse(get_user_leaves);
+        }
+
+        var get_public_holiday = $.ajax({
+            type: "GET",
+            url: "/static/json/masterPublicHoliday.json",
+            dataType: "application/json",
+            async: false
+        }).responseText;
+        var all_public_holiday = JSON.parse(get_public_holiday);
+
+
+        // AUTO DELETE ALL UNAPPROVED LEAVES THAT PASS TODAYS DATE
+        $( document ).ready(function() {
+            for (index in all_userleaves['leaves']){
+                selected_leave_start_date = new Date(all_userleaves['leaves'][index].start_date);
+                today = new Date();
+                today.setHours(0,0,0,0);
+                // IGNORE ABSENT
+                if(all_userleaves['leaves'][index].status === 'pending_approval' && all_userleaves['leaves'][index].leave_type.leave_type !== 'Absent'){
+                    if(selected_leave_start_date < today){
+                        deleteLeave(all_userleaves['leaves'][index].id);
+                    }
+                }
+            }
+        });
+
+        // RELOAD DATATABLE
+        function reloadDatatable(){
+            if(current_view === 'leave'){
+                urls = "/api/hrm/employee/leave/{{ selected_user.id }}/" + selected_year + "/?format=json";
+            }
+            else if(current_view === 'lead'){
+                urls = "/api/hrm/lead/leave/{{ selected_user.id }}/" + selected_year + "/?format=json";
+            }
+            else if(current_view === 'hrm'){
+                urls = "/api/hrm/leave/{{ selected_user.id }}/" + selected_year + "/?format=json";
+            }
+            employee_leaves_datatable.ajax.url(urls).load();
+            employee_entitlement_datatable.ajax.url("/api/hrm/entitlement/employee/{{ selected_user.id }}/" + selected_year + "/?format=json").load();
+        };
+
+        // CREATE ALL SELECT2 DROPDOWN
+        // YEAR FILTER
+        $('#yearSelect').select2({
+            placeholder: "Select a year",
+            multiple: false,
+            width: '80px',
+            height:'190px'
+        });
+
+        $('#yearSelect').val(null);
+
+        user_list = {{all_users|safe}};
+        lead_list = {{lead_users|safe}};
+
+        // HIDE LEAD TAB IF LOGIN USER HAS NO UNDERLING
+        $( document ).ready(function() {
+            if(lead_list.length === 0){
+                $("#lead_tab").removeClass("active");
+                $("#leave_tab").addClass("active");
+                switchView('leave');
+                $("#lead_tab").hide();
+            }
+        });
+
+        // LEAVE FORM - USER LIST
+        $('#userSelect').select2({
+            placeholder: "Select Employee",
+            data: lead_list,
+            multiple: false,
+            dropdownParent: $('#apply_leaves_modal'),
+            width: '100%',
+            height:'190px'
+        });
+        $('#userSelect').val(null).trigger('change');
+
+        $('#verifyStatusSelect').select2({
+            placeholder: "Select Status",
+            multiple: false,
+            dropdownParent: $('#apply_leaves_modal'),
+            width: '100%',
+            height:'190px'
+        });
+        $('#verifyStatusSelect').val(null).trigger('change');
+        $('#verifyStatusSelect').on('select2:select', function (e) {
+            lead_comment = document.getElementById("verify_lead_reason").value = ''
+        });
+        
+        // LEAVE FORM - LEAVE TYPE
+        // GET USER TOTAL AVAILABLE LEAVES
+        var leave_list = [];
+        var absent_leave_list = [];
+        var hrm_leave_list = [];
+        var absent_leave_id = [];
+        var unpaid_leave_id = [];
+
+        var entitlement_column_list = [];
+        {% for data in all_leave_type %}
+            leave_type_column = '{{data.leave_type}}';
+            leave_type_column = leave_type_column.toLowerCase().replace(/ /g,"_");
+
+            if('{{data.leave_type}}' === 'Absent'){
+                absent_leave_id = {{data.id}};
+                absent_leave_list.push({id: all_userleaves['entitlement']['{{data}}']['id'], text: '{{data}}', checked: false});
+
+                //DYNAMIC ENTITLEMENT ABSENT COLUMN
+                entitlement_column_list.push({"data" : "entitlement.absent.total_leave_applied", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th class="entitlement-column">Absent</th>`);
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">#</th>`);
+            }
+
+            // GET ONLY ENTITLED LEAVE
+            else if(all_userleaves['entitlement']['{{data}}']['total_entitled_day'] !== 0){
+                leave_list.push({id: all_userleaves['entitlement']['{{data}}']['id'], text: '{{data}}', checked: false});
+            }
+            // GET UNPAID LEAVE
+            else if('{{data.leave_type}}' === 'Unpaid'){
+                unpaid_leave_id = {{data.id}}
+                leave_list.push({id: all_userleaves['entitlement']['{{data}}']['id'], text: '{{data}}', checked: false});
+
+                //DYNAMIC ENTITLEMENT UNPAID COLUMN
+                entitlement_column_list.push({"data" : "entitlement.unpaid.total_leave_applied", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th class="entitlement-column">Unpaid</th>`);
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">Taken</th>`);
+            }
+
+            if(leave_type_column !== 'unpaid' && leave_type_column !== 'absent'){
+                //DYNAMIC ENTITLEMENT COLUMN
+                entitlement_column_list.push({"data" : "entitlement."+ leave_type_column +".total_entitled_day", "width": "auto", "visible": true,},
+                                            {"data" : "entitlement."+ leave_type_column +".total_available_leave", "width": "auto", "visible": true,},);
+                $('#entitlement_header').append(`<th colspan="2" class="entitlement-column">${'{{data.leave_type}}'}</th>`);
+
+                $('#entitlement_sub_header').append(`<th class="entitlement-column">Ent</th>
+                                                    <th class="entitlement-column">Bal</th>`);
+
+            }
+            hrm_leave_list.push({id: all_userleaves['entitlement']['{{data}}']['id'], text: '{{data}}', checked: false});
+        {% endfor %}
+
+        $('#leaveTypeSelect').select2({
+            placeholder: "Select Leave",
+            data: absent_leave_list,
+            multiple: false,
+            dropdownParent: $('#apply_leaves_modal'),
+            width: '100%',
+            height:'190px'
+        });
+        $('#leaveTypeSelect').val(null).trigger('change');
+
+        //ON YEAR SELECT
+        $('#yearSelect').on('select2:select', function (e) {
+            selected_year =  parseInt($("#yearSelect").val());
+            reloadDatatable();
+        });
+
+        // START/END DATE FILTER
+        // DATE FILTER
+        todayDate = moment(new Date()).format('DD MMM YYYY');
+        $('input[name="apply_leave_date"]').daterangepicker({
+            //autoUpdateInput: false,
+            "timePicker": false,
+            "autoApply": true,
+            "endDate": null,
+            'minDate': todayDate,
+            locale: {
+                format: 'DD MMM YYYY'
+            }
+            //"backdrop": false,
+        });
+
+        $('input[name="apply_leave_date"]').data('daterangepicker').setMinDate(todayDate);
+        // VIEW HANDLER
+        $("#entitlement_section").hide();
+        function switchView(view_selected){
+            if(view_selected === 'leave'){
+                current_view = view_selected;
+                employee_leaves_datatable.column( 2 ).visible( false );
+                $("#entitlement_section").show();
+                $(".btn-view-entitlement").hide();
+                $("#employee_field_section").hide();
+                $("#leaveTypeSelect").empty();
+                $('#leaveTypeSelect').select2({
+                    placeholder: "Select Leave",
+                    data: leave_list,
+                    dropdownParent: $('#apply_leaves_modal'),
+                    multiple: false,
+                    width: '100%',
+                    height:'190px'
+                });
+
+                todayDate = moment(new Date()).format('DD MMM YYYY');
+                $('input[name="apply_leave_date"]').data('daterangepicker').setMinDate(todayDate);
+
+                $(".apply-leave").attr('value', 'Apply Leave');
+            }
+            else if(view_selected === 'lead'){
+                current_view = view_selected
+                employee_leaves_datatable.column( 2 ).visible( true );
+                $("#entitlement_section").hide();
+                $(".btn-view-entitlement").show();
+                $("#employee_field_section").show();
+
+                // LEAVE FORM - USER LIST
+                $("#userSelect").empty();
+                $('#userSelect').select2({
+                    placeholder: "Select Employee",
+                    data: lead_list,
+                    multiple: false,
+                    dropdownParent: $('#apply_leaves_modal'),
+                    width: '100%',
+                    height:'190px'
+                });
+                $('#userSelect').val(null).trigger('change');
+
+                $("#leaveTypeSelect").empty();
+                $('#leaveTypeSelect').select2({
+                    placeholder: "Select Leave",
+                    data: absent_leave_list,
+                    dropdownParent: $('#apply_leaves_modal'),
+                    multiple: false,
+                    width: '100%',
+                    height:'190px'
+                });
+
+                todayDate = moment(new Date()).format('DD MMM YYYY');
+                $('input[name="apply_leave_date"]').data('daterangepicker').setMinDate(todayDate);
+
+                $(".apply-leave").attr('value', 'Mark as Absent');
+            }
+            else if(view_selected === 'hrm'){
+                current_view = view_selected
+                employee_leaves_datatable.column( 2 ).visible( true );
+                $("#entitlement_section").hide();
+                $(".btn-view-entitlement").show();
+                $("#employee_field_section").show();
+
+                // LEAVE FORM - USER LIST
+                $("#userSelect").empty();
+                $('#userSelect').select2({
+                    placeholder: "Select Employee",
+                    data: user_list,
+                    multiple: false,
+                    dropdownParent: $('#apply_leaves_modal'),
+                    width: '100%',
+                    height:'190px'
+                });
+                $('#userSelect').val(null).trigger('change');
+
+                $("#leaveTypeSelect").empty();
+                $('#leaveTypeSelect').select2({
+                    placeholder: "Select Leave",
+                    data: hrm_leave_list,
+                    dropdownParent: $('#apply_leaves_modal'),
+                    multiple: false,
+                    width: '100%',
+                    height:'190px'
+                });
+
+                $('input[name="apply_leave_date"]').data('daterangepicker').setMinDate('12 Oct 1990');
+
+                $(".apply-leave").attr('value', 'Apply Leave');
+            }
+            reloadDatatable();
+        }
+
+        // APPLY LEAVES FORM HANDLER
+        // ON FORM MODAL CLOSE
+        // RESET FORM
+        $('#apply_leaves_modal').on('hidden.bs.modal', function () {
+            leave_selected = 'no';
+            leave_type = '';
+            $( ".working_hour_section" ).hide();
+            $('#full_day').prop('checked',true);
+            $('#leave_available_field').html(`--`);
+            document.getElementById("verify_lead_reason").value = '';
+            $('#userSelect').val(null).trigger('change');
+            selected_year = new Date().getFullYear();
+        })
+
+        // ON LEAVE TYPE SELECT
+        $('#leaveTypeSelect').on('select2:select', function (e) {
+            selected_type = $('#leaveTypeSelect').select2('data');
+            leave_type = selected_type[0].text;
+
+            // RESET FORM
+            $("#apply_leave_date").data('daterangepicker').setStartDate(new Date());
+            $("#apply_leave_date").data('daterangepicker').setEndDate(null);
+            $('#total_date_display').html(``);
+            $('#total_duration_display').html(``);
+            $('#full_day').prop('checked',true);
+            $( ".working_hour_section" ).hide();
+            startDate = 'reset';
+            endDate = 'reset';
+
+            if (leave_type == 'Hospitalization' || leave_type == 'Parental') {
+                $('input[name="apply_leave_date"]').data('daterangepicker').setSingleDateRange(true);
+            }
+            else {
+                $('input[name="apply_leave_date"]').data('daterangepicker').setSingleDateRange(false);
+            }
+            populateLeaveStatus();
+
+        });
+
+        function populateLeaveStatus(){
+            getEmployeeSelectedYearData(selected_year);
+            //CHECK IF LEAVE TYPE ALREADY SELECTED
+            if(leave_type !== ''){
+                leave_selected = 'yes';
+                if(all_userleaves['entitlement'][leave_type]['id'] !== absent_leave_id && all_userleaves['entitlement'][leave_type]['id'] !== unpaid_leave_id){
+                    $('#leave_available_field').html(`Available [${selected_year}] : ${all_userleaves['entitlement'][leave_type]['total_available_leave']} Days`);
+                }
+                else {
+                    $('#leave_available_field').html(``);
+                }
+            }
+            else{
+                leave_selected = 'no'
+                $("#apply_leave_date").data('daterangepicker').setStartDate(new Date());
+                $("#apply_leave_date").data('daterangepicker').setEndDate(null);
+                $('#total_date_display').html(``)
+                $('#total_duration_display').html(``)
+                alert('Please select a leave type first')
+            }
+        };
+
+        // ON DATE APPLY
+        $('#apply_leave_date').on('apply.daterangepicker', function (ev, picker) {
+            half_day = false;
+            startDate = picker.startDate.format('YYYY-MM-DD');
+            endDate = picker.endDate.format('YYYY-MM-DD');
+
+            todayDate = moment(new Date()).format('YYYY-MM-DD');
+            var selected_start_date = moment(startDate);
+            var start_date_validation = moment(startDate).format('YYYY-MM-DD');
+            var selected_end_date = moment(endDate);
+            date_diff = selected_end_date.diff(selected_start_date, 'days');
+            selected_year = moment(startDate).year();
+            selected_end_date_year = moment(endDate).year();
+            temp_start_date = selected_start_date;
+            duration = 0;
+
+            populateLeaveStatus()
+            //CHECK IF LEAVE TYPE HAS ALREADY BEEN SELECTED
+            if(leave_selected == 'yes'){
+                //CHECK IF START & END DATE ARE THE SAME YEAR
+                if (selected_year === selected_end_date_year){
+                    //CHECK IF APPLIED DAY IS AFTER TODAY DATE
+                    date_validation_data = {
+                        apply_status: apply_status,
+                        leave_id: 0,
+                        start_date: startDate,
+                        end_date: endDate,
+                    };
+
+                    if (leave_type === 'Hospitalization' || leave_type === 'Parental') {
+                        duration = all_userleaves['entitlement'][leave_type]['total_available_leave'];
+                        add_days = duration - 1;
+                        endDate = moment(startDate).add(add_days, 'days').format('YYYY-MM-DD');
+                        date_validation_data['end_date'] = endDate;
+                        $('#total_duration_display').html(`${duration}`);
+                    }
+                    if(apply_status === 'PUT'){
+                        date_validation_data['leave_id'] = edit_leave_id;
+                    }
+
+                    if(current_view === 'leave'){
+                        filter_date_url = '/api/hrm/employee/leave/filter/{{ selected_user.id }}/';
+                    }
+                    else if(current_view === 'lead' || current_view === 'hrm'){
+                        selected_employee = $('#userSelect').select2('data');
+                        filter_date_url = '/api/hrm/employee/leave/filter/' + selected_employee[0].id +'/';
+                    }
+
+                    filteredDate = $.ajax({
+                        type: 'POST',
+                        url: filter_date_url,
+                        data: JSON.stringify(date_validation_data),
+                        contentType: 'application/json',
+
+                        success:function(){
+                            //CHECK IF LEAVE ALREADY APPLIED ON SELECTED DATE
+                            date_validation_data = filteredDate.responseJSON;
+                            $('#full_day').prop('checked',true);
+
+                            // FOR APPLYING 2 HALF DAY LEAVES IN SAME DAY
+                            if(startDate === endDate && date_validation_data.length === 1 ){
+                                if(date_validation_data[0].working_hour_duration === 'full_day'){
+                                    document.getElementById("applyLeaves_Button").disabled = true;
+                                    $('#total_date_display').html(`<span style="color:red"> *Leave(s) has been applied in this dates</span>`);
+                                    $('#total_duration_display').html(`<span style="color:red"> *--</span>`);
+                                }
+                                else {
+                                    half_day = true;
+                                    half_day_working_hour = date_validation_data[0].working_hour_duration;
+                                    duration = 0.5;
+
+                                    $(".working_hour_section").show();
+                                    $('#total_date_display').html(`${startDate} - ${endDate}`);
+                                    duration = 1;
+                                    //CHECK IF THE CURRENT DATE IS ON WEEKEND
+                                    if (temp_start_date.isoWeekday() === 6 || temp_start_date.isoWeekday() === 7) {
+                                        document.getElementById("applyLeaves_Button").disabled = true;
+                                        duration = 0;
+                                        $('#full_day').prop('checked',true);
+                                        $( ".working_hour_section" ).hide();
+                                        $('#total_date_display').html(`<span style="color:red">*${startDate} - ${endDate} Weekend</span>`);
+                                        alert("The date selected is a weekend");
+
+                                    }
+
+                                    //CHECK IF THE CURRENT DATE IS ON PUBLIC HOLIDAY
+                                    current_date = moment(temp_start_date).format('YYYY-MM-DD');
+                                    public_holiday_list = all_public_holiday.public_holiday;
+                                    check_public_holiday = public_holiday_list.includes(current_date);
+                                    if(check_public_holiday === true){
+                                        duration = 0;
+                                        document.getElementById("applyLeaves_Button").disabled = true;
+                                        $('#full_day').prop('checked',true);
+                                        $( ".working_hour_section" ).hide();
+                                        $('#total_date_display').html(`${startDate} - ${endDate} <span style="color:red"> *Public Holiday</span>`);
+                                        alert("The date selected is a public holiday");
+                                    }
+                                }
+                            }
+                            else if(date_validation_data.length === 0){
+                                document.getElementById("applyLeaves_Button").disabled = false;
+                                //IF SINGLE DAY DATE SELECTED
+                                if(startDate === endDate){
+                                    $(".working_hour_section").show();
+                                    $('#total_date_display').html(`${startDate} - ${endDate}`);
+                                    duration = 1;
+                                    //CHECK IF THE CURRENT DATE IS ON WEEKEND
+                                    if (temp_start_date.isoWeekday() === 6 || temp_start_date.isoWeekday() === 7) {
+                                        document.getElementById("applyLeaves_Button").disabled = true;
+                                        duration = 0;
+                                        $('#full_day').prop('checked',true);
+                                        $( ".working_hour_section" ).hide();
+                                        $('#total_date_display').html(`<span style="color:red">*${startDate} - ${endDate} Weekend</span>`);
+                                        alert("The date selected is a weekend");
+
+                                    }
+
+                                    //CHECK IF THE CURRENT DATE IS ON PUBLIC HOLIDAY
+                                    current_date = moment(temp_start_date).format('YYYY-MM-DD');
+                                    public_holiday_list = all_public_holiday.public_holiday;
+                                    check_public_holiday = public_holiday_list.includes(current_date);
+                                    if(check_public_holiday === true){
+                                        document.getElementById("applyLeaves_Button").disabled = true;
+                                        duration = 0;
+                                        $('#full_day').prop('checked',true);
+                                        $( ".working_hour_section" ).hide();
+                                        $('#total_date_display').html(`${startDate} - ${endDate} <span style="color:red"> *Public Holiday</span>`);
+                                        alert("The date selected is a public holiday")
+                                    }
+                                }
+                                //  IF LEAVE SELECTED IS Hospitalization && PARENTAL
+                                else if (leave_type === 'Hospitalization' || leave_type === 'Parental') {
+                                    document.getElementById("applyLeaves_Button").disabled = false;
+                                    duration = all_userleaves['entitlement'][leave_type]['total_available_leave'];
+                                    $('#total_date_display').html(`${startDate} - ${endDate}`);
+                                }
+                                //IF MULTIPLE DAYS DATE SELECTED
+                                else{
+                                    $('#full_day').prop('checked',true);
+                                    $( ".working_hour_section" ).hide();
+                                    for (x=1; x<=date_diff+1; x++){
+                                        //CHECK IF THE CURRENT DATE IS ON WEEKEND
+                                        if (temp_start_date.isoWeekday() !== 6 && temp_start_date.isoWeekday() !== 7) {
+                                            duration += 1;
+                                        }
+                                        //CHECK IF THE CURRENT DATE IS ON PUBLIC HOLIDAY
+                                        current_date = moment(temp_start_date).format('YYYY-MM-DD');
+                                        public_holiday_list = all_public_holiday.public_holiday;
+                                        check_public_holiday = public_holiday_list.includes(current_date);
+                                        if(check_public_holiday === true){
+                                            duration -= 1;
+                                        }
+                                        document.getElementById("applyLeaves_Button").disabled = false;
+                                        temp_start_date = moment(selected_start_date).add(x, 'days');
+                                        $('#total_date_display').html(`${startDate} - ${endDate}`);
+                                    }
+                                }
+
+                                $('#total_duration_display').html(`${duration}`);
+                            }
+
+                            else{
+                                document.getElementById("applyLeaves_Button").disabled = true;
+                                $('#total_date_display').html(`<span style="color:red"> *Leave(s) has been applied in this dates</span>`);
+                                $('#total_duration_display').html(`<span style="color:red"> *--</span>`);
+                            }
+                        },
+                    })
+                }
+                else{
+                    $("#apply_leave_date").data('daterangepicker').setStartDate(new Date());
+                    $("#apply_leave_date").data('daterangepicker').setEndDate(null);
+                    $('#total_date_display').html(``);
+                    $('#total_duration_display').html(``);
+                    alert('You are only allow to apply date within the same year');
+                }
+            }
+            else{
+
+            }
+        });
+        //ON WORKING HOUR SELECTED
+        $('input[type=radio][name=working_hour_duration]').change(function() {
+            if (this.value === 'full_day') {
+                duration = 1;
+                $('#total_duration_display').html(`${duration}`);
+            }
+            else {
+                duration = 0.5;
+                $('#total_duration_display').html(`${duration}`);
+            }
+        });
+
+        //ON APPLY LEAVES
+        function applyLeave(){
+            if (startDate === 'reset') {
+                alert('Please reassign date after selecting different leave type');
+            }
+            else {
+                selected_type = $('#leaveTypeSelect').select2('data');
+                if(current_view === 'lead' && apply_status === 'PUT'){
+                    selected_row_data = employee_leaves_datatable.rows('.selected').data();
+                    for (i in selected_row_data) {
+                        if(selected_row_data[i].id !== undefined){
+                            leave_type_id = selected_row_data[i].leave_type.id
+                            leave_type = selected_row_data[i].leave_type.leave_type                    
+                        }
+                    }
+                }
+                else{   
+                    leave_type = selected_type[0].text;
+                    leave_type_id = selected_type[0].id;
+                }
+                
+                selected_status = $("#verifyStatusSelect").val()
+                lead_comment = document.getElementById("verify_lead_reason").value
+                //POPULATE POST DATA OBJECT
+                leave_comment = document.getElementById("apply_leave_comment").value;
+                working_hour = document.querySelector('input[name="working_hour_duration"]:checked').value;
+                available_leave = all_userleaves['entitlement'][leave_type]['total_available_leave'];
+                // ADD BACK DURATION INTO AVAILABLE LEAVE
+                if(apply_status === 'PUT'){
+                    var get_edited_leaves = $.ajax({
+                        type: "GET",
+                        url: "/api/hrm/leave_detail/" + edit_leave_id + "/?format=json",
+                        dataType: "application/json",
+                        async: false
+                    }).responseText;
+                    var edited_leaves = JSON.parse(get_edited_leaves);
+                    available_leave = available_leave + edited_leaves.duration;
+                }
+                //CHECK IF ALL FIELD HAS FILLED
+                if(selected_type.length !== 0 && leave_comment !== ''){
+                    //CHECK IF APPLIED LEAVE DAYS IS NOT EXCEEDING AVAILABLE LEAVE DAYS UNLESS IT'S ABSENT OR UNPAID LEAVE
+                    if(leave_type === 'Absent' || leave_type === 'Unpaid'){
+                        // CHECK IF USER SELECTED IN LEAD AND HRM VIEW
+                        if(current_view === 'lead' || current_view === 'hrm'){
+                            selected_employee = $('#userSelect').select2('data');
+                            if(selected_employee.length !== 0){
+                                // CHECK IF YOU ALREADY APPLY LEAVE AT THIS WORK HOUR
+                                if (half_day === false) {
+                                    updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                                }
+                                else if (half_day === true && half_day_working_hour !== working_hour && working_hour !== 'full_day') {
+                                    updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                                }
+                                else {
+                                    alert('You already applied a leave at this work hour');
+                                }
+                            }
+                            else{
+                                alert('Please select a employee to assign leave');
+                            }
+                        }
+                        else if (current_view === 'leave'){
+                            // CHECK IF YOU ALREADY APPLY LEAVE AT THIS WORK HOUR
+                            if (half_day === false) {
+                                updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                            }
+                            else if (half_day === true && half_day_working_hour !== working_hour && working_hour !== 'full_day') {
+                                updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                            }
+                            else {
+                                alert('You already applied a leave at this work hour');
+                            }
+                        }
+                    }
+                    else if(leave_type !== 'Absent' && leave_type !== 'Unpaid' && duration <= available_leave){
+                        // CHECK IF YOU ALREADY APPLY LEAVE AT THIS WORK HOUR
+                        if (half_day === false) {
+                            updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                        }
+                        else if (half_day === true && half_day_working_hour !== working_hour && working_hour !== 'full_day') {
+                            updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment);
+                        }
+                        else {
+                            alert('You already applied a leave at this work hour');
+                        }
+                    }
+                    else{
+                        if (current_view === 'leave'){
+                            alert(`You does not have enough available days for the leave type that is being applied.\n
+                            Available days : ${available_leave}\n
+                            Applied duration : ${duration}\n` );
+                        }
+                        else if( current_view === 'lead' || current_view === 'hrm'){
+                            alert(`${selected_employee[0].text} does not have enough available days for the leave type that is being applied.\n
+                            Available days : ${available_leave}\n
+                            Applied duration : ${duration}\n` );
+                        }
+                    }
+                }
+                else{
+                    alert("Please fill in all the fields");
+                }
+            }
+        }
+
+        // DATA CREATING / EDITING / DELETING SECTION
+        //CREATE & EDIT LEAVES
+        function updateLeave(startDate, endDate, working_hour, duration, leave_type_id, leave_type, leave_comment, selected_status, lead_comment){
+            var leave_user_id = {{ selected_user.id }};
+            temp_status = ''
+            leave_updateData = {
+                "employee": {{selected_user.id}},
+                "status": 'pending_approval',
+                "start_date": startDate,
+                "end_date": endDate,
+                "modified_date": moment(),
+                "working_hour_duration": working_hour,
+                "duration": duration,
+                "leave_type": leave_type_id,
+                "leave_type_name": leave_type,
+                "comment": leave_comment,
+            };
+            // GET DATA FROM USER SELECT2 IF IN LEAD OR HRM VIEW
+            if( current_view === 'lead' || current_view === 'hrm'){
+                selected_employee = $('#userSelect').select2('data');
+                leave_user_id = selected_employee[0].id;
+                leave_updateData['employee'] = selected_employee[0].id;
+                (current_view === 'lead' || current_view === 'hrm')
+                
+            }
+            
+            if(apply_status === 'POST'){
+                update_url = "/api/hrm/employee/leave/"+leave_user_id+"/" + selected_year + "/?format=json";
+            }
+            if(apply_status === 'PUT'){
+                update_url = "/api/hrm/leave_detail/" + edit_leave_id + "/?format=json";
+                leave_updateData['status'] = edit_status;
+                if(selected_status === 'pending_approval'){
+                    leave_updateData['status'] = selected_status;
+                    leave_updateData['approved_by'] = '',
+                    leave_updateData['lead_comment'] = '';
+                }
+                else if(selected_status !== 'pending_approval' && current_view === 'lead' || current_view === 'hrm'){
+                    leave_updateData['status'] = selected_status;
+                    leave_updateData['approved_by'] = {{ selected_user.id }},
+                    leave_updateData['lead_comment'] = lead_comment;
+                }
+                if(startDate.length === 0){
+                    leave_updateData['start_date'] = moment(edit_startDate).format('YYYY-MM-DD');
+                    leave_updateData['end_date'] = moment(edit_endDate).format('YYYY-MM-DD');
+                }
+            }
+            temp_status = leave_updateData['status']
+            if(current_view =='leave' ){
+                ajaxLeave()
+            }
+            else if(selected_status == 'pending_approval'){
+                ajaxLeave()
+            }
+            else if(lead_comment !== null && lead_comment !== '' && lead_comment !== undefined){
+                ajaxLeave()
+            }
+            else{
+                alert("Please provide a reason fo status change")
+            }
+            function ajaxLeave(){
+                if(duration !== 0){
+                    $.ajax({
+                        type: apply_status,
+                        url: update_url,
+                        data: JSON.stringify(leave_updateData),
+                        contentType: 'application/json',
+                        success:function(){
+                            if(apply_status === 'POST'){
+                                var get_latest_leaves = $.ajax({
+                                    type: "GET",
+                                    url: "/api/hrm/leave_detail/latest/?format=json",
+                                    dataType: "application/json",
+                                    async: false
+                                }).responseText;
+                                var latest_leaves = JSON.parse(get_latest_leaves);
+
+                                employee_leaves_datatable.row.add(latest_leaves).draw();
+                                employee_entitlement_datatable.ajax.url("/api/hrm/entitlement/employee/{{ selected_user.id }}/" + selected_year + "/?format=json").load();
+
+                                $('#yearSelect').val(selected_year).trigger('change');
+                            }
+                            if(apply_status === 'PUT'){
+                                if(startDate.length !== 0){
+                                    selected_row_data[0]['start_date'] = startDate;
+                                    selected_row_data[0]['end_date'] = endDate;
+                                }
+                                selected_row_data[0]['leave_type']['leave_type'] = leave_type;
+                                selected_row_data[0]['duration'] = duration;
+                                selected_row_data[0]['working_hour_duration'] = working_hour;
+                                selected_row_data[0]['comment'] = leave_comment;       
+                                selected_row_data[0]['status'] = temp_status;
+                                selected_row_data[0]['modified_date'] = moment()
+                                
+                                if(temp_status !== 'pending_approval'){
+                                    selected_row_data[0]['lead_comment'] = lead_comment;
+                                    approved_by_data = {'id': {{selected_user.id}}, 'official_name' : '{{selected_user.official_name}}'};
+                                    selected_row_data[0]['approved_by'] = approved_by_data;
+                                }
+                                else{
+                                    selected_row_data[0]['lead_comment'] = '';
+                                    selected_row_data[0]['approved_by'] = {};
+                                }
+                                
+                                employee_leaves_datatable.row('.selected').data(selected_row_data[0]).invalidate();
+
+                                employee_entitlement_datatable.ajax.url("/api/hrm/entitlement/employee/{{ selected_user.id }}/" + selected_year + "/?format=json").load();
+                            }
+
+                            //RESET FORM
+                            $('#apply_leaves_modal').modal('hide');
+                            selected_year = new Date().getFullYear();
+                        },
+                        error: function(err){
+                            alert("Failed");
+                            console.log(err);
+                        }
+                    })
+                }
+                else{
+                    alert("Please select a valid date");
+                }
+            }
+        }
+
+        // DELETE LEAVES
+        function deleteLeave(leave_id){
+            $.ajax({
+                type: 'DELETE',
+                url: '/api/hrm/leave_detail/' + leave_id,
+                success: function () {
+                     reloadDatatable()
+                },
+                error: function (err) {
+                    alert("Failed because of " + err);
+                    console.log(err);
+                }
+            })
+        }
+
+        // LEAVES DATATABLE
+        var employee_leaves_datatable = $('#employee_leaves_datatable').DataTable({
+            dom: 'Bflrti',
+            JQueryUI: true,
+            stateSave: false,
+            "lengthChange": false,
+            //scrollY: '70vh',
+            "sScrollX": "100%",
+            paging: false,
+            iDisplayLength: -1,
+            destroy: true,
+            height: '100%',
+            responsive: false,
+            select: true,
+            ajax: {
+                url: "/api/hrm/lead/leave/{{ selected_user.id }}/" + selected_year + "/?format=json",
+                dataSrc: 'leaves',
+            },
+            columns : [
+            {"data" : "id", "width": "10", "visible": true,},
+            {"data" : "employee.id", "width": "10", "visible": false,},
+            {"data" : "employee.official_name", className: "align-left", "width": "300", "visible": true,},
+            {"data" : "leave_type.leave_type", "width": "auto", "visible": true,},
+            {"data": "comment", className: "align-left", "width": "200"},
+            {"data": "start_date", "width": "auto", "render": function (data, type, row) {
+                date = moment(data).format("DD MMM");
+                return `${date}`;
+            }},
+            {"data": "end_date", "width": "auto", "render": function (data, type, row) {
+                date = moment(data).format("DD MMM");
+                return `${date}`;
+            }},
+            {"data": "duration", "width": "auto"},
+            {"data": "working_hour_duration", "width": "auto", "render": function (data, type, row) {
+                capitalize_working_hour = data.split('_').join(' ');
+                return `<p style="cursor: pointer; text-transform: capitalize;")">${capitalize_working_hour}</p>`;
+            }},
+            {"data": "status", "width": "auto", "render": function (data, type, row) {
+                capitalize_status = data.split('_').join(' ');
+                if(data === 'pending_approval'){
+                    return `<p style="cursor: pointer; text-transform: capitalize; text-align: center;")"><span style="margin-top:10px;"class="badge badge-warning">${capitalize_status}</span></p>`;
+                }
+                else if(data === 'approved'){
+                    return `<p style="cursor: pointer; text-transform: capitalize; text-align: center;")"><span style="margin-top:10px;"class="badge badge-success">${capitalize_status}</span></p>`;
+                }
+                else if(data === 'rejected'){
+                    return `<p style="cursor: pointer; text-transform: capitalize; text-align: center;")"><span style="margin-top:10px;"class="badge badge-danger">${capitalize_status}</span></p>`;
+                }
+                else if(data === 'cancelled'){
+                    return `<p style="cursor: pointer; text-transform: capitalize; text-align: center;")"><span style="margin-top:10px;"class="badge badge-danger">${capitalize_status}</span></p>`;
+                }
+            }},
+            {"data": "approved_by.official_name", "width": "auto", "render": function (data, type, row) {
+                if(data == null){
+                    return ``
+                }
+                else{
+                    return `${data}`;
+                }
+            }},
+            {"data": "lead_comment", "width": "auto", "render": function (data, type, row) {
+                if(data == null){
+                    return ``
+                }
+                else{
+                    return `${data}`;
+                }
+            }},
+            {"data": "modified_date", "width": "auto", "render": function (data, type, row) {
+                if(data == null){
+                    return ``
+                }
+                else{
+                    date = moment(data).format("DD MMM YYYY LT");
+                    return `${date}`;
+                }
+            }},
+            ],
+            buttons: [
+            {
+                text: 'Apply Leave',
+                action: function (e, dt, node, config) {
+                    $("#lead_edit_leave_type").hide()
+                    $("#leave_type_field").show();
+                    $("#verifyFormSection").hide();
+                    $('#verifyStatusSelect').val('pending_approval').trigger('change');
+                    //ENABLE SELECT2
+                    $("#userSelect").prop("disabled", false);
+                    $("#leave_modal_title").html(`Apply Leave`);
+                    $("#leaveTypeSelect").prop("disabled", false);
+                    $("#apply_leave_date").show();
+                    $("#apply_leave_comment").prop("disabled", false);
+                    //SET APPLY STATUS FOR POST
+                    apply_status = 'POST'
+
+                    //RESET FORM VALUES
+                    half_day = false;
+                    $('#leaveTypeSelect').val(null).trigger('change');
+                    $('#total_date_display').html('')
+                    $('#total_duration_display').html('')
+                    startDate = [];
+                    endDate = [];
+                    $("#apply_leave_date").data('daterangepicker').setStartDate(new Date());
+                    $("#apply_leave_date").data('daterangepicker').setEndDate(null);
+                    document.getElementById("apply_leave_comment").value = '';
+                    if(lead_assigned ==='false' && current_view === 'leave'){
+                        alert("You're not allowed to apply leaves because you have no lead assigned to you, please contact HR for more inquiry")
+                    }
+                    else{
+                        $('#apply_leaves_modal').modal('show');
+                    }
+                },
+                className: 'btn-leave-form btn btn-success-2 apply-leave btn-outline btn-small'
+            },
+            {
+                text: 'View Entitlements',
+                action: function (e, dt, node, config) {
+
+                    window.open("/hrm/employee/entitlement/"+current_view+"/", "", "toolbar=0,status=0,fullscreen=yes");
+                },
+                className: 'btn-view-entitlement btn btn-success-2 btn-outline btn-small'
+            }]
+        });
+
+        //MOVE FILTER TO RIGHT
+        $('.dataTables_length').addClass('pull-right');
+
+        // LEAVE TABLE CONTEXT MENU
+        $(document).contextMenu({
+            selector: '#employee_leaves_datatable td',
+            callback: function (menu_item_name, options) {
+                if (menu_item_name === "edit_leave") {
+                    $("#lead_edit_leave_type").hide()
+                    $("#leave_type_field").show();
+                    $("#userSelect").prop("disabled", true);
+                    if (current_view === 'leave'){
+                        $("#verifyFormSection").hide();
+                        $("#leaveTypeSelect").prop("disabled", false);
+                        $("#apply_leave_date").show();
+                        $("#apply_leave_comment").prop("disabled", false);
+                    }
+                    else if(current_view === 'lead'){
+                        $("#verifyFormSection").show();
+                        $("#leaveTypeSelect").prop("disabled", true);
+                        $("#apply_leave_date").hide();
+                        $("#apply_leave_comment").prop("disabled", true);
+                    }
+                    else{
+                        $("#verifyFormSection").show();
+                        $("#leaveTypeSelect").prop("disabled", false);
+                        $("#apply_leave_date").show();
+                        $("#apply_leave_comment").prop("disabled", false);
+                    }
+                    //RESET FORM VALUES
+                    half_day = false;
+                    startDate = [];
+                    endDate = [];
+                    selected_row_data = employee_leaves_datatable.rows('.selected').data();
+                    total_selected = []
+                    for (i in selected_row_data) {
+                        if(selected_row_data[i].id !== undefined){
+                            total_selected.push(selected_row_data[i].id)
+                            leave_type = selected_row_data[i].leave_type.leave_type
+                            edit_leave_id = selected_row_data[i].id
+                            edit_user_id = selected_row_data[i].employee.id
+                            edit_leave_type = selected_row_data[i].leave_type.id
+                            edit_startDate = selected_row_data[i].start_date
+                            edit_endDate = selected_row_data[i].end_date
+                            edit_duration = selected_row_data[i].duration;
+                            edit_status = selected_row_data[i].status;
+                            duration = edit_duration;
+                            edit_working_hour = selected_row_data[i].working_hour_duration;
+                            edit_comment = selected_row_data[i].comment;
+                            edit_lead_comment = selected_row_data[i].lead_comment;
+                        }
+                    }
+                    
+                    if(total_selected.length === 1){
+                        //DISABLE EDIT IF LEAVE IS PASS OR ONGOING
+                        today = new Date();
+
+                        // DISABLED EDITING ABSENT LEAVE IF USER HAS NO LEAVE MANAGER ACCESS
+                        if ('{{ request.user|has_group:"Leaves Manager" }}' === 'False' && leave_type === 'Absent'){
+                            alert("Only HR is allowed to edit absent leaves");
+                        }
+                        // LEAVE MANAGER IS NOT ALLOWED TO EDIT HIS/HER OWN ABSENT LEAVES
+                        else if('{{ request.user|has_group:"Leaves Manager" }}' === 'True' && leave_type === 'Absent' && (current_view === 'leave' || current_view === 'lead')){
+                            alert("Only HR is allowed to edit absent leaves");
+                        }
+                        else{
+                            // DISABLE EDIT IF LEAVE ALREADY PASSED EXCEPT FOR ABSENT
+                            if(new Date(edit_startDate) > today || leave_type === 'Absent' || current_view ==='hrm'){
+                                //DISABLE EDIT IF LEAVE ALREADY APPROVED OR REJECTED FOR LEAVE VIEW
+                                if((edit_status === 'approved' || edit_status === 'rejected') && current_view === 'leave'){
+                                    alert('Leave has already been '+edit_status+', you can no longer edit it');
+                                }
+                                else{
+                                    // PREVENT EDITING YOUR OWN LEAVES
+                                    if(edit_user_id === {{selected_user.id}} && current_view ==='hrm'){
+                                        alert("You're not allowed to edit your own leave");
+                                    }
+                                    else{
+                                        //SET APPLY STATUS FOR EDIT
+                                        apply_status = 'PUT'
+                                        //SET LEAVE EXISTING DATA INTO FORM
+                                        if (current_view !== 'leave'){
+                                            $('#userSelect').val(edit_user_id).trigger('change');
+                                        }
+                                        selected_type = $('#leaveTypeSelect').select2('data');
+                                        if(current_view === 'lead' && apply_status === 'PUT'){
+                                            $('#leaveTypeSelect').val(absent_leave_id).trigger('change');
+                                            $("#lead_edit_leave_type").show()
+                                            $("#leave_type_field").hide();
+                                            $("#lead_edit_leave_type").html(`${leave_type}`)
+                                        }
+                                        else{
+                                            $('#leaveTypeSelect').val(edit_leave_type).trigger('change');
+                                        }
+                                        $("#" + edit_working_hour).prop("checked", true);
+                                        $('#total_date_display').html(`${edit_startDate} - ${edit_endDate}`);
+                                        $('#total_duration_display').html(`${edit_duration}`);
+                                        $("#apply_leave_date").data('daterangepicker').setStartDate(moment(edit_startDate));
+                                        $("#apply_leave_date").data('daterangepicker').setEndDate(moment(edit_endDate));
+                                        populateLeaveStatus();
+                                        document.getElementById("apply_leave_comment").value = edit_comment;
+                                        $('#verifyStatusSelect').val(edit_status).trigger('change');
+                                        document.getElementById("verify_lead_reason").value = edit_lead_comment;
+
+                                        $('#apply_leaves_modal').modal('show');
+                                    }
+
+                                }
+                            }
+                            else{
+                                alert("This leave either ongoing or passed you can't edit it anymore");
+                            }
+                        }
+                    }
+                    else if (total_selected.length > 1){
+                        alert('Multiple leave edit is not allowed');
+                    }
+                    else{
+                        alert('Please select a leave to edit');
+                    }
+                }
+                if (menu_item_name === "delete_leave") {
+                    selected_row_data = employee_leaves_datatable.rows('.selected').data();
+                    var confirmation = confirm("Are you sure you want to delete all selected delete? You will not be able to recover it again.");
+                    if (confirmation) {
+                        for (i in selected_row_data) {
+                            if(selected_row_data[i].id !== undefined){
+                                selected_leave_start_date = new Date(selected_row_data[i].start_date);
+                                today = new Date();
+                                today.setHours(0,0,0,0);
+                                if(selected_leave_start_date < today && current_view !=='hrm'){
+                                    alert("Unable to delete, leave is either on going or already passed, if it isn't approve after the end date, this date will be automatically remove");
+                                }
+                                else{
+                                    if(selected_row_data[0]['status'] === 'pending_approval' || current_view ==='hrm'){
+                                        // PREVENT NORMAL EMPLOYEE TO DELETE ABSENT LEAVE
+                                        if(current_view === 'leave'){
+                                            if(selected_row_data[i].leave_type.id !== absent_leave_id){
+                                                deleteLeave(selected_row_data[i].id);
+                                            }
+                                            else{
+                                                alert(`You're not allowed to delete absent leave`);
+                                            }
+                                        }
+                                        else{
+                                            deleteLeave(selected_row_data[i].id);
+                                        }
+                                    }
+                                    else {
+                                        alert('You cannot delete a leave that has already been ' + selected_row_data[0]['status'] + '. Please contact HR for approval on any further changes.');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            items: {
+                "edit_leave": {
+                    name: "Edit Leave",
+                    icon: "fa-edit",
+                },
+                "delete_leave": {name: "Delete Leave(s)",
+                icon: "fa-trash",
+                visible: function(key, opt){
+                    if( current_view === 'lead' ){
+                        return false;
+                    }
+                    else if( current_view === 'leave' || current_view === 'hrm'){
+                        return true;
+                    }
+
+                }
+            }
+        },
+    })
+
+    // ENTITLEMENT DATATABLE
+
+    var employee_entitlement_datatable = $('#employee_entitlement_datatable').DataTable({
+        dom: 'Blrtp',
+        JQueryUI: true,
+        bPaginate: false,
+        destroy: true,
+        pageResize: true,
+        "sScrollX": "100%",
+        scrollY: '45px',
+        responsive: false,
+        select: false,
+        "ordering": false,
+        ajax: {
+            url: "/api/hrm/entitlement/employee/{{ selected_user.id }}/" + selected_year + "/?format=json",
+            dataSrc: '',
+        },
+        columns : entitlement_column_list,
+        buttons: [
+        ]
+    });
+</script>
+{% endblock content %}
